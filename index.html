@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>新闻爬虫</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+		<div class="container" style="margin-top: 20px">
+			<div class="row">
+				<div class="col-md-6 col-xs-6">
+					<div class="panel panel-default">
+					  <div class="panel-heading">
+					    <h3 class="panel-title">爬取配置</h3>
+					  </div>
+					  <div class="panel-body">
+					    <div class="form-group">
+					      <label for="">标题最小长度</label>
+					      <input type="text" class="form-control" id="" placeholder="请输入最小长度">
+					    </div>
+							<div class="form-group">
+							  <label for="">标题最大长度</label>
+							  <input type="text" class="form-control" id="" placeholder="请输入最大长度">
+							</div>
+							<div class="form-group">
+					      <label for="">内容最小长度</label>
+					      <input type="text" class="form-control" id="" placeholder="请输入最小长度">
+					    </div>
+							<div class="form-group">
+							  <label for="">内容最大长度</label>
+							  <input type="text" class="form-control" id="" placeholder="请输入最大长度">
+							</div>
+							<div class="form-group">
+							  <label for="">关键词处理</label>
+								<div class=" btn-group-sm">
+								  <a href="#" id="word-exclude" title="排除指遇到特殊关键词时丢弃" class="btn btn-sm btn-info">排除词汇</a>
+									<a href="#" id="word-include" title="包含指遇到特殊关键词时保留" class="btn btn-sm btn-warning">包含词汇</a>
+									<a href="#" id="word-replace" title="替换指遇到特殊关键词时替换" class="btn btn-sm btn-danger">替换词汇</a>
+								</div>
+								<p class="help-block">注: 排除或包含一行一个关键词</p>
+								<p class="help-block">注: 替换词汇一行一组词，词组中间用逗号分隔.如:幸运,开心，将替换幸运为开心</p>
+							</div>
+					  </div>
+					</div>
+				</div>
+				<div class="col-md-6 col-xs-6">
+					<div class="panel panel-default">
+					  <div class="panel-heading clearfix">
+					    <h3 class="panel-title pull-left">软件配置</h3>
+					  </div>
+					  <div class="panel-body">
+							<div class="form-group">
+							  <label for="">服务器IP</label>
+							  <input type="text" class="form-control" name="db-ip" placeholder="请输入数据库服务器IP地址">
+							</div>
+							<div class="form-group">
+							  <label for="">端口</label>
+							  <input type="text" class="form-control" name="db-port" placeholder="" value="3306">
+							</div>
+							<div class="form-group">
+							  <label for="">数据库名</label>
+							  <input type="text" class="form-control" name="db-name" placeholder="请输入数据库名">
+							</div>
+							<div class="form-group">
+							  <label for="">用户名</label>
+							  <input type="text" class="form-control" name="db-username" placeholder="请输入用户名">
+							</div>
+							<div class="form-group">
+							  <label for="">密码</label>
+							  <input type="password" class="form-control" name="db-password" placeholder="请输入密码">
+							</div>
+					  </div>
+						<div class="panel-footer clearfix">
+							<div class="pull-right">
+								<a href="#" id="process-start" class="btn btn-sm btn-success">开始</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+      <div class="row">
+				<div class="col-md-12 col-xs-12">
+				  <div class="panel panel-default">
+				    <div class="panel-heading clearfix">
+				      <h3 class="panel-title pull-left">站点管理</h3>
+							<div class="pull-right">
+								<a href="#" id="add-site" class="btn btn-sm btn-success">添加站点</a>
+								<a href="#" id="import-site" class="btn btn-sm btn-warning">批量导入</a>
+								<a href="#" id="delete-site" class="btn btn-sm btn-danger">删除站点</a>
+							</div>
+				    </div>
+				    <div class="panel-body">
+				      <table class="table" id="site-config">
+								<thead>
+									<th><input type="checkbox" name="selectAll"></th>
+									<th>站点名称</th>
+									<th>运行状态</th>
+									<th>操作</th>
+									<th>爬取间隔(秒)</th>
+									<th>最近爬取</th>
+								</thead>
+								<tbody>
+								</tbody>
+				      </table>
+				    </div>
+						<div class="panel-footer">
+							<div class="input-group">
+							  <span class="input-group-addon">站点调试</span>
+							  <input type="text" id="site-debug-url" class="form-control" placeholder="请输入要调试的站点网址">
+								<span class="input-group-btn">
+						        <button class="btn btn-success" id="site-debug" type="button">调试</button>
+						   </span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+    </div>
+		<div class="modal fade" id="site-modal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title">站点爬虫配置</h4>
+		      </div>
+		      <div class="modal-body">
+						<div class="row">
+							<form class="container col-xs-12 col-md-12 col-sm-12">
+								<div class="form-group input-group">
+								  <label for="">站点类型</label>
+								  <select class="form-control" name="type">
+										<option value="rss">rss</option>
+								  	<option value="html">html</option>
+								  </select>
+								</div>
+								<div class="form-group">
+								  <label for="name">站点名</label>
+								  <input type="text" class="form-control" name="name" placeholder="请输入站点名称">
+								</div>
+								<div class="form-group">
+								  <label for="link">爬取链接</label>
+								  <input type="text" class="form-control" name="link" placeholder="请输入站点链接">
+								</div>
+								<div class="form-group">
+								  <label for="cycle">爬取间隔(秒)</label>
+								  <input type="text" class="form-control" name="cycle" placeholder="请输入间隔时间" value="">
+								</div>
+								<div class="form-group">
+								  <label for="title">标题字段</label>
+								  <input type="text" class="form-control" name="title" placeholder="默认为rss字段，若站点类型是html请填写css选择语法">
+								</div>
+								<div class="form-group">
+								  <label for="">内容字段</label>
+								  <input type="text" class="form-control" name="content" placeholder="默认为rss字段，若站点类型是html请填写css选择语法">
+								</div>
+							</form>
+						</div>
+		      </div>
+		      <div class="modal-footer">
+						<button type="button" class="btn btn-success" id="site-save">保存</button>
+		        <button type="button" class="btn btn-default" data-dismiss="modal">退出</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<!-- 模版配置 -->
+		<script id="tpl-item" type="text/html">
+			<tr data-type="{{type}}">
+				<td><input type="checkbox" name="select"></td>
+				<td><a href="#" onclick="edit(this)">{{name}}</a></td>
+				<td><span class="label label-danger">已停止</span></td>
+				<td><span class="label btn-success">启动</span></td>
+				<td><span class="label btn-info">{{cycle}}</span></td>
+				<td><span></span></td>
+			</tr>
+		</script>
+
+		<script id="tpl-items" type="text/html">
+			{{each items}}
+        {{include 'tpl-item' $value}}
+			{{/each}}
+		</script>
+		<!-- Insert this line above script imports  -->
+		<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="assets/js/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="assets/js/bootstrap.min.js"></script>
+		<!-- Include art template -->
+		<script src="assets/js/template-web.js"></script>
+		<!-- Insert this line after script imports -->
+		<script>if (window.module) module = window.module;</script>
+		<script type="text/javascript">
+			const { ipcRenderer } = require('electron');
+
+			initialize();
+
+			function initialize() {
+				registerEventListener();
+			}
+
+			function toggleButton(el) {
+				let state = ($(el).html().trim() == '开始' && !reset) ? '停止' : '开始';
+				if (state == '开始') {
+					$(el).attr('class', 'btn btn-sm btn-success');
+					$(el).closest('td').prev().find('span').html('已停止');
+					$(el).closest('td').prev().find('span').attr('class', 'label label-danger');
+				} else {
+					$(el).attr('class', 'btn btn-sm btn-danger');
+					$(el).closest('td').prev().find('span').html('运行中');
+					$(el).closest('td').prev().find('span').attr('class', 'label label-success');
+				}
+				$(el).html(state);
+			}
+
+			function registerEventListener() {
+				$('#site-debug').on('click', (e) => {
+					var url = $('#site-debug-url').val();
+					if (url) {
+						ipcRenderer.send('site-debug', {url: url});
+					}
+				});
+
+				$('#add-site').on('click', (e) => {
+					$('#site-modal').modal('show');
+				});
+
+				$('#import-site').on('click', (e) => {
+					ipcRenderer.send('import-site', {});
+				});
+
+				$('#site-save').on('click', (e) => {
+					var unindexed_array = $('form').serializeArray();
+			    var site = {};
+
+			    $.map(unindexed_array, function(n, i){
+			        site[n['name']] = n['value'];
+			    });
+
+					var html = template('tpl-item', site);
+
+					$('#site-config>tbody').append(html);
+
+					$('#site-modal').modal('hide');
+				});
+
+				ipcRenderer.on('process-die', (e, data) => {
+					toggleButton($('span[id$="' + data.type + '-start' + '"]'), true);
+				});
+			}
+		</script>
+  </body>
+</html>

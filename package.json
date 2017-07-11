@@ -1,0 +1,18 @@
+{
+  "name": "news-spider",
+  "version": "0.1.0",
+  "main": "main.js",
+  "dependencies": {
+    "async": "^2.4.1",
+    "bluebird": "^3.5.0",
+    "cheerio": "^1.0.0-rc.1",
+    "cron": "^1.2.1",
+    "lodash": "^4.17.4",
+    "mysql": "^2.13.0",
+    "redis": "^2.7.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "sequelize": "^3.30.4",
+    "sequelize-mysql-timestamp": "^1.2.2"
+  }
+}
