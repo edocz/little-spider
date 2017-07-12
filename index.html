@@ -224,6 +224,10 @@
 				$(el).html(state);
 			}
 
+			function edit(el) {
+				$('#site-modal').modal('show');
+			}
+
 			function registerEventListener() {
 				$('#site-debug').on('click', (e) => {
 					var url = $('#site-debug-url').val();
@@ -241,18 +245,23 @@
 				});
 
 				$('#site-save').on('click', (e) => {
-					var unindexed_array = $('form').serializeArray();
-			    var site = {};
+					var site = {};
 
+					var unindexed_array = $('form').serializeArray();
 			    $.map(unindexed_array, function(n, i){
 			        site[n['name']] = n['value'];
 			    });
 
 					var html = template('tpl-item', site);
-
 					$('#site-config>tbody').append(html);
 
 					$('#site-modal').modal('hide');
+				});
+
+				ipcRenderer.on('import-site', (e, sites) => {
+					var html = template('tpl-items', {items: sites});
+					$('#site-config>tbody').empty();
+					$('#site-config>tbody').append(html);
 				});
 
 				ipcRenderer.on('process-die', (e, data) => {

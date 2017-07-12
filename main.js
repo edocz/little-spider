@@ -2,6 +2,7 @@ const {app, BrowserWindow, ipcMain, dialog} = require('electron')
 const url   = require('url')
 const path  = require('path')
 const fs    = require('fs')
+const _     = require('lodash')
 const spwan = require('child_process').spawn
 const fork  = require('child_process').fork
 
@@ -40,7 +41,7 @@ function createDebugWindow(url) {
   debugWin.webContents.openDevTools()
 
   debugWin.on('closed', () => {
-    win = null
+    debugWin = null
   })
 }
 
@@ -77,6 +78,13 @@ ipcMain.on('import-site', (event, data) => {
 			{ name: 'Custom File Type', extensions: ['as'] },
 			{ name: 'All Files', extensions: ['*'] }
 		]
+	}, (files) => {
+		_.each(files, (file) => {
+			var content = fs.readFileSync(file).toString()
+			isValidJson(content) && (content = JSON.parse(content))
+			console.log(content.length)
+			event.sender.send('import-site', content)
+		});
 	});
 })
 
@@ -89,3 +97,13 @@ ipcMain.on('config-change', (event, data) => {
 ipcMain.on('check-process', (event, data) => {
 
 })
+
+/** 工具类函数 **/
+function isValidJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
