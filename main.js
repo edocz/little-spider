@@ -3,9 +3,8 @@ const url   = require('url')
 const path  = require('path')
 const fs    = require('fs')
 const _     = require('lodash')
-const spwan = require('child_process').spawn
-const fork  = require('child_process').fork
-
+const { exec, spwan, fork } = require('child_process')
+const CONFIG_PATH = 'config.json';
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
@@ -59,16 +58,12 @@ app.on('activate', () => {
   }
 })
 
-// 读取配置
-function loadConfig(configPath) {
-	return config;
-}
-
-// 授权检查
+// 调试模式
 ipcMain.on('site-debug', (event, data) => {
 	createDebugWindow(data.url);
 })
 
+// 导入站点
 ipcMain.on('import-site', (event, data) => {
 	dialog.showOpenDialog({
 		properties: ['openFile'],
@@ -82,15 +77,31 @@ ipcMain.on('import-site', (event, data) => {
 		_.each(files, (file) => {
 			var content = fs.readFileSync(file).toString()
 			isValidJson(content) && (content = JSON.parse(content))
-			console.log(content.length)
 			event.sender.send('import-site', content)
 		});
 	});
 })
 
-// 配置变更
-ipcMain.on('config-change', (event, data) => {
+// 关键词处理配置
+ipcMain.on('word-config', (event, data) => {
+	var file = data.type + '.txt';
+	if (!fs.existsSync(file)) fs.writeFileSync(file, '');
+	var cmd = 'notepad.exe ' + file;
+	exec(cmd, (err, stdout, stderr) => {
+	  if (err) return;
+	});
+})
 
+// 配置变更
+ipcMain.on('config', (event, data) => {
+	if (data.action == 'save') {
+		fs.writeFileSync(CONFIG_PATH, JSON.stringify(data.config));
+	} else if (data.action == 'load') {
+		var content = fs.readFileSync(CONFIG_PATH);
+		var config = {}
+		if (isValidJson(content)) config = JSON.parse(content);
+		event.sender.send('config-loaded', config)
+	}
 })
 
 // 进程状态检查

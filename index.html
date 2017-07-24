@@ -27,19 +27,19 @@
 					  <div class="panel-body">
 					    <div class="form-group">
 					      <label for="">标题最小长度</label>
-					      <input type="text" class="form-control" id="" placeholder="请输入最小长度">
+					      <input type="number" class="form-control" id="title-min" placeholder="请输入最小长度">
 					    </div>
 							<div class="form-group">
 							  <label for="">标题最大长度</label>
-							  <input type="text" class="form-control" id="" placeholder="请输入最大长度">
+							  <input type="number" class="form-control" id="title-max" placeholder="请输入最大长度">
 							</div>
 							<div class="form-group">
 					      <label for="">内容最小长度</label>
-					      <input type="text" class="form-control" id="" placeholder="请输入最小长度">
+					      <input type="number" class="form-control" id="content-min" placeholder="请输入最小长度">
 					    </div>
 							<div class="form-group">
 							  <label for="">内容最大长度</label>
-							  <input type="text" class="form-control" id="" placeholder="请输入最大长度">
+							  <input type="number" class="form-control" id="content-max" placeholder="请输入最大长度">
 							</div>
 							<div class="form-group">
 							  <label for="">关键词处理</label>
@@ -62,28 +62,29 @@
 					  <div class="panel-body">
 							<div class="form-group">
 							  <label for="">服务器IP</label>
-							  <input type="text" class="form-control" name="db-ip" placeholder="请输入数据库服务器IP地址">
+							  <input type="text" class="form-control" id="db-ip" placeholder="请输入数据库服务器IP地址">
 							</div>
 							<div class="form-group">
 							  <label for="">端口</label>
-							  <input type="text" class="form-control" name="db-port" placeholder="" value="3306">
+							  <input type="number" class="form-control" id="db-port" placeholder="" value="3306">
 							</div>
 							<div class="form-group">
 							  <label for="">数据库名</label>
-							  <input type="text" class="form-control" name="db-name" placeholder="请输入数据库名">
+							  <input type="text" class="form-control" id="db-name" placeholder="请输入数据库名">
 							</div>
 							<div class="form-group">
 							  <label for="">用户名</label>
-							  <input type="text" class="form-control" name="db-username" placeholder="请输入用户名">
+							  <input type="text" class="form-control" id="db-username" placeholder="请输入用户名">
 							</div>
 							<div class="form-group">
 							  <label for="">密码</label>
-							  <input type="password" class="form-control" name="db-password" placeholder="请输入密码">
+							  <input type="password" class="form-control" id="db-password" placeholder="请输入密码">
 							</div>
 					  </div>
 						<div class="panel-footer clearfix">
 							<div class="pull-right">
-								<a href="#" id="process-start" class="btn btn-sm btn-success">开始</a>
+								<a href="#" id="app-start" class="btn btn-sm btn-success">开始</a>
+								<a href="#" id="app-save" class="btn btn-sm btn-warning">保存</a>
 							</div>
 						</div>
 					</div>
@@ -103,7 +104,7 @@
 				    <div class="panel-body">
 				      <table class="table" id="site-config">
 								<thead>
-									<th><input type="checkbox" name="selectAll"></th>
+									<th><input type="checkbox" id="selectAll"></th>
 									<th>站点名称</th>
 									<th>运行状态</th>
 									<th>操作</th>
@@ -207,6 +208,7 @@
 			initialize();
 
 			function initialize() {
+				ipcRenderer.send('config', {action: 'load'})
 				registerEventListener();
 			}
 
@@ -258,15 +260,43 @@
 					$('#site-modal').modal('hide');
 				});
 
+				$('a[id^="word-"]').on('click', (e) => {
+					var type = $(e.target).attr('id');
+					ipcRenderer.send('word-config', {type: type});
+				})
+
+				$('#app-save').on('click', (e) => {
+					var config = buildConfig();
+					console.log(config)
+					ipcRenderer.send('config', {action: 'save', config: config});
+				})
+
 				ipcRenderer.on('import-site', (e, sites) => {
 					var html = template('tpl-items', {items: sites});
 					$('#site-config>tbody').empty();
 					$('#site-config>tbody').append(html);
 				});
 
-				ipcRenderer.on('process-die', (e, data) => {
+				ipcRenderer.on('app-die', (e, data) => {
 					toggleButton($('span[id$="' + data.type + '-start' + '"]'), true);
 				});
+
+				ipcRenderer.on('config-loaded', (e, data) => {
+					for(var id in data) {
+						var sel = '#' + id;
+						$(sel).val(data[id]);
+					}
+				})
+			}
+
+			function buildConfig() {
+				var config = {}
+				$('input[type!="checkbox"]').map((i, el) => {
+					var key = $(el).attr('id')
+					var val = $(el).val()
+					config[key] = val
+				})
+				return config;
 			}
 		</script>
   </body>

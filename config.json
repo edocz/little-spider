@@ -1,1 +1,1 @@
-[{"type":"html","name":"baidu","cycle":5,"link":"http://news.baidu.com","title":"$('h1').text()","content":"$('p').text()"}]
+{"content-max":"4","content-min":"3","db-ip":"5","db-name":"6","db-password":"8","db-port":"3306","db-username":"7","site-debug-url":"","title-max":"2","title-min":"1","undefined":""}
