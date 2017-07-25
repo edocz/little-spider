@@ -108,7 +108,7 @@
 				      <table class="table" id="site-config">
 								<thead>
 									<th><input type="checkbox" id="selectAll"></th>
-									<th>站点名称</th>
+									<th>链接</th>
 									<th>类型</th>
 									<th>运行状态</th>
 									<th>爬取间隔(秒)</th>
@@ -150,12 +150,8 @@
 								  </select>
 								</div> -->
 								<div class="form-group">
-								  <label for="name">站点名</label>
-								  <input type="text" class="form-control" name="name" placeholder="请输入站点名称">
-								</div>
-								<div class="form-group">
-								  <label for="link">爬取链接</label>
-								  <input type="text" class="form-control" name="link" placeholder="请输入站点链接">
+								  <label for="url">爬取链接</label>
+								  <input type="text" class="form-control" name="url" placeholder="请输入站点链接">
 								</div>
 								<div class="form-group">
 								  <label for="cycle">爬取间隔(秒)</label>
@@ -181,9 +177,9 @@
 		</div>
 		<!-- 模版配置 -->
 		<script id="tpl-item" type="text/html">
-			<tr data-type="{{type}}">
+			<tr data-type="{{type}}" data-url="{{url}}"  data-cycle="{{cycle}}">
 				<td><input type="checkbox" name="select"></td>
-				<td><a href="#" onclick="edit(this)">{{name}}</a></td>
+				<td><a href="#" onclick="edit(this)">{{url}}</a></td>
 				<td><span class="label label-danger">已停止</span></td>
 				<td><span class="label btn-success">启动</span></td>
 				<td><span class="label btn-info">{{cycle}}</span></td>
@@ -213,6 +209,7 @@
 
 			function initialize() {
 				ipcRenderer.send('config', {action: 'load'})
+				ipcRenderer.send('config', {action: 'sites'})
 				registerEventListener();
 			}
 
@@ -231,6 +228,9 @@
 			}
 
 			function edit(el) {
+				var data = $(el).closest('tr').data()
+				$('#site-modal').find('input[name="url"]:first').val(data.url)
+				$('#site-modal').find('input[name="cycle"]:first').val(data.cycle)
 				$('#site-modal').modal('show');
 			}
 
@@ -258,9 +258,10 @@
 			        site[n['name']] = n['value'];
 			    });
 
+					$('tr[data-url="' + site.url + '"]').remove()
+
 					var html = template('tpl-item', site);
 					$('#site-config>tbody').append(html);
-
 					$('#site-modal').modal('hide');
 				});
 

@@ -8,6 +8,7 @@ let MODEL_PATH  = __dirname + '/models/'
 
 var exports = {
 	connect: connect,
+	disconnect: disconnect,
 	sequelize: sequelize
 }
 
@@ -18,7 +19,7 @@ function connect(config) {
 		dialect: 'mysql',
 		logging: false,
 		define: {
-			timestamps: false
+			timestamps: true
 		},
 		pool: {
 			max: 5,
@@ -36,6 +37,10 @@ function connect(config) {
 		var tablename = filename.replace('.js', '');
 		exports[tablename] = exports.sequelize.import(MODEL_PATH + filename);
 	});
+}
+
+function disconnect() {
+	exports.sequelize.close()
 }
 
 module.exports = exports;

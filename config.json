@@ -1,1 +1,13 @@
-{"content-max":"4","content-min":"3","database":"news","host":"192.168.199.238","password":"root","port":"3306","site-debug-url":"","title-max":"2","title-min":"1","undefined":"","username":"root"}
+{
+  "content-max": "1000",
+  "content-min": "50",
+  "database": "news",
+  "host": "192.168.199.238",
+  "password": "root",
+  "port": "3306",
+  "site-debug-url": "",
+  "title-max": "20",
+  "title-min": "5",
+  "undefined": "",
+  "username": "root"
+}

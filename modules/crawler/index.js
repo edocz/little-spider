@@ -18,7 +18,12 @@ var getData = function(item){
 				var charset = 'utf-8';
 				if (response.headers['content-type'].indexOf('charset=') !== -1) {
 					var result = response.headers['content-type'].split('charset=')[1].split(';')[0];
-					if (result != null) charset = result;
+					if (result != null) charset = result.toLowerCase();
+				} else {
+					var matched = body.toString().match(/<meta.*charset="?([a-z0-9-]+)".*/i);
+					if (matched !== null) {
+						charset = matched[1];
+					}
 				}
 				return cheerio.load(iconv.decode(body, charset), {decodeEntities: false});
 			}

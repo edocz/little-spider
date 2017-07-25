@@ -1,10 +1,11 @@
-const {app, BrowserWindow, ipcMain, dialog} = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const { exec, spwan, fork } = require('child_process')
 const url   = require('url')
 const path  = require('path')
 const fs    = require('fs')
 const _     = require('lodash')
 const db    = require('./modules/database')
+const util  = require('./modules/util')
 
 const CONFIG_PATH = 'config.json';
 const SITE_PATH   = 'sites.json';
@@ -49,24 +50,19 @@ function createDebugWindow(url) {
   })
 }
 
-function saveSites(records, sites) {
-	var site = {}
-	_.each(records, (record) => {
-		// site.type
-		// site.name
-		// site.cycle
-		// site.link
-	})
-	sites.push(site)
-	fs.writeFileSync(SITE_PATH, JSON.stringify(_.uniq(sites, 'link')))
+function saveSites(content, sites) {
+	_.each(content.split('\n'), (line) => {
+		if (!line) return;
+		var site = {}
+		site.type = 'rss';
+		site.cycle= 300;
+		site.url = line;
+		site.title = line;
+		sites.push(site);
+	});
+	sites = _.uniqBy(sites, 'url')
+	fs.writeFileSync(SITE_PATH, JSON.stringify(sites, undefined, 2))
 	return sites;
-}
-
-function loadSites() {
-	var results = []
-	var content = fs.readFileSync(SITE_PATH)
-	if (isValidJson(content)) results = JSON.parse(content)
-	return results
 }
 
 app.on('ready', createWindow)
@@ -80,7 +76,6 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (win === null) {
     createWindow()
-		sites = loadSites()
   }
 })
 
@@ -100,7 +95,6 @@ ipcMain.on('import-site', (event, data) => {
 	}, (files) => {
 		_.each(files, (file) => {
 			var content = fs.readFileSync(file).toString()
-			isValidJson(content) && (content = JSON.parse(content))
 			sites = saveSites(content, sites)
 			event.sender.send('import-site', sites)
 		});
@@ -122,20 +116,26 @@ ipcMain.on('word-config', (event, data) => {
 // 配置变更
 ipcMain.on('config', (event, data) => {
 	if (data.action == 'save') {
-		fs.writeFileSync(CONFIG_PATH, JSON.stringify(data.config));
+		fs.writeFileSync(CONFIG_PATH, JSON.stringify(data.config, undefined, 2));
 	} else if (data.action == 'load') {
 		var config = {}
 		var content = fs.readFileSync(CONFIG_PATH);
-		if (isValidJson(content)) config = JSON.parse(content);
+		if (util.isValidJson(content)) config = JSON.parse(content);
 		event.sender.send('config-loaded', config)
+	} else if (data.action == 'sites') {
+		var content = fs.readFileSync(SITE_PATH)
+		if (util.isValidJson(content)) sites = JSON.parse(content)
+		event.sender.send('import-site', sites)
 	}
 })
 
+// 程序运行状态切换
 ipcMain.on('app', (event, data) => {
 	switch(data.action) {
 		case 'start':
 			try {
 				db.connect(data.config)
+
 			} catch(e) {
 				console.log(e)
 				event.sender.send('app-state-change', false)
@@ -144,27 +144,19 @@ ipcMain.on('app', (event, data) => {
 			event.sender.send('app-state-change', true)
 			break;
 		case 'stop':
+			try {
+				db.disconnect()
+			} catch(e) {
+				console.log(e)
+				event.sender.send('app-state-change', false)
+				return;
+			}
 			event.sender.send('app-state-change', true)
 			break;
 		case 'quit':
 			app.quit()
 			break;
 		default:
-
+			console.log('unknown action!')
 	}
 })
-
-// 进程状态检查
-ipcMain.on('check-process', (event, data) => {
-
-})
-
-/** 工具类函数 **/
-function isValidJson(str) {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
