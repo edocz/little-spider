@@ -62,29 +62,32 @@
 					  <div class="panel-body">
 							<div class="form-group">
 							  <label for="">服务器IP</label>
-							  <input type="text" class="form-control" id="db-ip" placeholder="请输入数据库服务器IP地址">
+							  <input type="text" class="form-control" id="host" placeholder="请输入数据库服务器IP地址">
 							</div>
 							<div class="form-group">
 							  <label for="">端口</label>
-							  <input type="number" class="form-control" id="db-port" placeholder="" value="3306">
+							  <input type="number" class="form-control" id="port" placeholder="" value="3306">
 							</div>
 							<div class="form-group">
 							  <label for="">数据库名</label>
-							  <input type="text" class="form-control" id="db-name" placeholder="请输入数据库名">
+							  <input type="text" class="form-control" id="database" placeholder="请输入数据库名">
 							</div>
 							<div class="form-group">
 							  <label for="">用户名</label>
-							  <input type="text" class="form-control" id="db-username" placeholder="请输入用户名">
+							  <input type="text" class="form-control" id="username" placeholder="请输入用户名">
 							</div>
 							<div class="form-group">
 							  <label for="">密码</label>
-							  <input type="password" class="form-control" id="db-password" placeholder="请输入密码">
+							  <input type="password" class="form-control" id="password" placeholder="请输入密码">
 							</div>
 					  </div>
 						<div class="panel-footer clearfix">
+							<div class="pull-left">
+								<a href="#" id="app-save" class="btn btn-sm btn-warning" style="display: none;">保存</a>
+							</div>
 							<div class="pull-right">
 								<a href="#" id="app-start" class="btn btn-sm btn-success">开始</a>
-								<a href="#" id="app-save" class="btn btn-sm btn-warning">保存</a>
+								<a href="#" id="app-quit" class="btn btn-sm btn-default">退出</a>
 							</div>
 						</div>
 					</div>
@@ -106,8 +109,8 @@
 								<thead>
 									<th><input type="checkbox" id="selectAll"></th>
 									<th>站点名称</th>
+									<th>类型</th>
 									<th>运行状态</th>
-									<th>操作</th>
 									<th>爬取间隔(秒)</th>
 									<th>最近爬取</th>
 								</thead>
@@ -138,13 +141,14 @@
 		      <div class="modal-body">
 						<div class="row">
 							<form class="container col-xs-12 col-md-12 col-sm-12">
-								<div class="form-group input-group">
+								<input type="hidden" name="type" value="rss">
+								<!-- <div class="form-group input-group">
 								  <label for="">站点类型</label>
 								  <select class="form-control" name="type">
 										<option value="rss">rss</option>
 								  	<option value="html">html</option>
 								  </select>
-								</div>
+								</div> -->
 								<div class="form-group">
 								  <label for="name">站点名</label>
 								  <input type="text" class="form-control" name="name" placeholder="请输入站点名称">
@@ -157,19 +161,19 @@
 								  <label for="cycle">爬取间隔(秒)</label>
 								  <input type="text" class="form-control" name="cycle" placeholder="请输入间隔时间" value="">
 								</div>
-								<div class="form-group">
+								<!-- <div class="form-group">
 								  <label for="title">标题字段</label>
 								  <input type="text" class="form-control" name="title" placeholder="默认为rss字段，若站点类型是html请填写css选择语法">
 								</div>
 								<div class="form-group">
 								  <label for="">内容字段</label>
 								  <input type="text" class="form-control" name="content" placeholder="默认为rss字段，若站点类型是html请填写css选择语法">
-								</div>
+								</div> -->
 							</form>
 						</div>
 		      </div>
 		      <div class="modal-footer">
-						<button type="button" class="btn btn-success" id="site-save">保存</button>
+						<button type="button" class="btn btn-success" id="site-modal-save">保存</button>
 		        <button type="button" class="btn btn-default" data-dismiss="modal">退出</button>
 		      </div>
 		    </div>
@@ -213,7 +217,7 @@
 			}
 
 			function toggleButton(el) {
-				let state = ($(el).html().trim() == '开始' && !reset) ? '停止' : '开始';
+				let state = ($(el).html().trim() == '开始') ? '停止' : '开始';
 				if (state == '开始') {
 					$(el).attr('class', 'btn btn-sm btn-success');
 					$(el).closest('td').prev().find('span').html('已停止');
@@ -246,7 +250,7 @@
 					ipcRenderer.send('import-site', {});
 				});
 
-				$('#site-save').on('click', (e) => {
+				$('#site-modal-save').on('click', (e) => {
 					var site = {};
 
 					var unindexed_array = $('form').serializeArray();
@@ -265,20 +269,38 @@
 					ipcRenderer.send('word-config', {type: type});
 				})
 
+				$('input').on('change', (e) => {
+					$('#app-save').show();
+				})
+
 				$('#app-save').on('click', (e) => {
 					var config = buildConfig();
-					console.log(config)
 					ipcRenderer.send('config', {action: 'save', config: config});
+					$(e.target).hide();
+				})
+
+				$('#app-quit').on('click', (e) => {
+					ipcRenderer.send('app', { action: 'quit' });
+				})
+
+				$('#app-start').on('click', (e) => {
+					var state = $(e.target).html().trim();
+					if (state == '开始') {
+						ipcRenderer.send('app', { action: 'start', config: buildConfig() });
+					} else if (state == '停止') {
+						ipcRenderer.send('app', { action: 'stop' });
+					}
+				})
+
+				ipcRenderer.on('app-state-change', (e, data) => {
+					if (data) toggleButton($('#app-start'));
+					else console.log('失败')
 				})
 
 				ipcRenderer.on('import-site', (e, sites) => {
 					var html = template('tpl-items', {items: sites});
 					$('#site-config>tbody').empty();
 					$('#site-config>tbody').append(html);
-				});
-
-				ipcRenderer.on('app-die', (e, data) => {
-					toggleButton($('span[id$="' + data.type + '-start' + '"]'), true);
 				});
 
 				ipcRenderer.on('config-loaded', (e, data) => {

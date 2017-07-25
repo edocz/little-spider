@@ -1,18 +1,23 @@
 const {app, BrowserWindow, ipcMain, dialog} = require('electron')
+const { exec, spwan, fork } = require('child_process')
 const url   = require('url')
 const path  = require('path')
 const fs    = require('fs')
 const _     = require('lodash')
-const { exec, spwan, fork } = require('child_process')
+const db    = require('./modules/database')
+
 const CONFIG_PATH = 'config.json';
+const SITE_PATH   = 'sites.json';
+const osType = require('os').type()
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 let debugWin
+let sites = []
 
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({width: 800, height: 600})
+  win = new BrowserWindow({width: 800, height: 750})
 
   // and load the index.html of the app.
   win.loadURL(url.format({
@@ -44,6 +49,26 @@ function createDebugWindow(url) {
   })
 }
 
+function saveSites(records, sites) {
+	var site = {}
+	_.each(records, (record) => {
+		// site.type
+		// site.name
+		// site.cycle
+		// site.link
+	})
+	sites.push(site)
+	fs.writeFileSync(SITE_PATH, JSON.stringify(_.uniq(sites, 'link')))
+	return sites;
+}
+
+function loadSites() {
+	var results = []
+	var content = fs.readFileSync(SITE_PATH)
+	if (isValidJson(content)) results = JSON.parse(content)
+	return results
+}
+
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
@@ -55,6 +80,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (win === null) {
     createWindow()
+		sites = loadSites()
   }
 })
 
@@ -68,25 +94,26 @@ ipcMain.on('import-site', (event, data) => {
 	dialog.showOpenDialog({
 		properties: ['openFile'],
 		filters: [
-			{ name: 'Images', extensions: ['jpg', 'png', 'gif'] },
-			{ name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
-			{ name: 'Custom File Type', extensions: ['as'] },
+			{ name: 'Images', extensions: ['json'] },
 			{ name: 'All Files', extensions: ['*'] }
 		]
 	}, (files) => {
 		_.each(files, (file) => {
 			var content = fs.readFileSync(file).toString()
 			isValidJson(content) && (content = JSON.parse(content))
-			event.sender.send('import-site', content)
+			sites = saveSites(content, sites)
+			event.sender.send('import-site', sites)
 		});
 	});
 })
 
 // 关键词处理配置
 ipcMain.on('word-config', (event, data) => {
+	var cmd = 'notepad ';
+	if (osType == 'Darwin') cmd = 'open ';
 	var file = data.type + '.txt';
 	if (!fs.existsSync(file)) fs.writeFileSync(file, '');
-	var cmd = 'notepad.exe ' + file;
+	cmd = cmd + file;
 	exec(cmd, (err, stdout, stderr) => {
 	  if (err) return;
 	});
@@ -97,10 +124,33 @@ ipcMain.on('config', (event, data) => {
 	if (data.action == 'save') {
 		fs.writeFileSync(CONFIG_PATH, JSON.stringify(data.config));
 	} else if (data.action == 'load') {
-		var content = fs.readFileSync(CONFIG_PATH);
 		var config = {}
+		var content = fs.readFileSync(CONFIG_PATH);
 		if (isValidJson(content)) config = JSON.parse(content);
 		event.sender.send('config-loaded', config)
+	}
+})
+
+ipcMain.on('app', (event, data) => {
+	switch(data.action) {
+		case 'start':
+			try {
+				db.connect(data.config)
+			} catch(e) {
+				console.log(e)
+				event.sender.send('app-state-change', false)
+				return;
+			}
+			event.sender.send('app-state-change', true)
+			break;
+		case 'stop':
+			event.sender.send('app-state-change', true)
+			break;
+		case 'quit':
+			app.quit()
+			break;
+		default:
+
 	}
 })
 
