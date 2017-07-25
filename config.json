@@ -6,7 +6,7 @@
   "password": "root",
   "port": "3306",
   "site-debug-url": "",
-  "title-max": "20",
+  "title-max": "50",
   "title-min": "5",
   "undefined": "",
   "username": "root"

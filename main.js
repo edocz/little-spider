@@ -6,9 +6,12 @@ const fs    = require('fs')
 const _     = require('lodash')
 const db    = require('./modules/database')
 const util  = require('./modules/util')
+const worker = require('./modules/worker')
 
 const CONFIG_PATH = 'config.json';
 const SITE_PATH   = 'sites.json';
+const DEBUG       = false;
+
 const osType = require('os').type()
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -28,7 +31,7 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  win.webContents.openDevTools()
+  if (DEBUG) win.webContents.openDevTools()
 
   win.on('closed', () => {
     win = null
@@ -135,7 +138,7 @@ ipcMain.on('app', (event, data) => {
 		case 'start':
 			try {
 				db.connect(data.config)
-
+				worker.run(db, event)
 			} catch(e) {
 				console.log(e)
 				event.sender.send('app-state-change', false)

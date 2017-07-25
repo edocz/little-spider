@@ -14,8 +14,8 @@ var exports = {
 
 function connect(config) {
 	exports.sequelize = new Sequelize(config.database, config.username, config.password, {
-		host: config.hostname,
-		port: config.port,
+		host: config.host,
+		port: parseInt(config.port),
 		dialect: 'mysql',
 		logging: false,
 		define: {
@@ -30,12 +30,13 @@ function connect(config) {
 
 	var files = fs.readdirSync(MODEL_PATH);
 
-	files.forEach(function(filename) {
+	files.forEach((filename) => {
 		var fullname = path.join(MODEL_PATH, filename);
 		var stats = fs.statSync(fullname);
 		if (stats.isDirectory()) return;
 		var tablename = filename.replace('.js', '');
 		exports[tablename] = exports.sequelize.import(MODEL_PATH + filename);
+		exports[tablename].sync()
 	});
 }
 

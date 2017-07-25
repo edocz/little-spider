@@ -4,6 +4,20 @@
 //
 // fs.writeFileSync('config.json', JSON.stringify(config));
 //
+//
+const util = require('./modules/util');
+const fs = require('fs');
+const CONFIG_PATH  = __dirname + '/config.json';
+
+let content = fs.readFileSync(CONFIG_PATH);
+let config = {}
+
+if (util.isValidJson(content)) config = JSON.parse(content)
+
+const db    = require('./modules/database')
+
+db.connect(config)
+
 const worker = require('./modules/worker');
 
-worker.run()
+worker.run(db)

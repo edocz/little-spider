@@ -34,11 +34,11 @@
 							  <input type="number" class="form-control" id="title-max" placeholder="请输入最大长度">
 							</div>
 							<div class="form-group">
-					      <label for="">内容最小长度</label>
+					      <label for="">段落最小长度</label>
 					      <input type="number" class="form-control" id="content-min" placeholder="请输入最小长度">
 					    </div>
 							<div class="form-group">
-							  <label for="">内容最大长度</label>
+							  <label for="">段落最大长度</label>
 							  <input type="number" class="form-control" id="content-max" placeholder="请输入最大长度">
 							</div>
 							<div class="form-group">
@@ -109,9 +109,7 @@
 								<thead>
 									<th><input type="checkbox" id="selectAll"></th>
 									<th>链接</th>
-									<th>类型</th>
 									<th>运行状态</th>
-									<th>爬取间隔(秒)</th>
 									<th>最近爬取</th>
 								</thead>
 								<tbody>
@@ -119,13 +117,16 @@
 				      </table>
 				    </div>
 						<div class="panel-footer">
-							<div class="input-group">
+							<div class="">
+								<p class="text-danger"></p>
+							</div>
+							<!-- <div class="input-group">
 							  <span class="input-group-addon">站点调试</span>
 							  <input type="text" id="site-debug-url" class="form-control" placeholder="请输入要调试的站点网址">
 								<span class="input-group-btn">
 						        <button class="btn btn-success" id="site-debug" type="button">调试</button>
 						   </span>
-							</div>
+							</div> -->
 						</div>
 					</div>
 				</div>
@@ -153,10 +154,10 @@
 								  <label for="url">爬取链接</label>
 								  <input type="text" class="form-control" name="url" placeholder="请输入站点链接">
 								</div>
-								<div class="form-group">
+								<!-- <div class="form-group">
 								  <label for="cycle">爬取间隔(秒)</label>
 								  <input type="text" class="form-control" name="cycle" placeholder="请输入间隔时间" value="">
-								</div>
+								</div> -->
 								<!-- <div class="form-group">
 								  <label for="title">标题字段</label>
 								  <input type="text" class="form-control" name="title" placeholder="默认为rss字段，若站点类型是html请填写css选择语法">
@@ -180,10 +181,10 @@
 			<tr data-type="{{type}}" data-url="{{url}}"  data-cycle="{{cycle}}">
 				<td><input type="checkbox" name="select"></td>
 				<td><a href="#" onclick="edit(this)">{{url}}</a></td>
-				<td><span class="label label-danger">已停止</span></td>
-				<td><span class="label btn-success">启动</span></td>
-				<td><span class="label btn-info">{{cycle}}</span></td>
-				<td><span></span></td>
+				<!-- <td><span class="label label-danger">已停止</span></td> -->
+				<td><span state class="label label-danger">停止</span></td>
+				<!-- <td><span class="label btn-info">{{cycle}}</span></td> -->
+				<td><span latest-update></span></td>
 			</tr>
 		</script>
 
@@ -309,6 +310,23 @@
 						var sel = '#' + id;
 						$(sel).val(data[id]);
 					}
+				})
+
+				ipcRenderer.on('task', (e, data) => {
+					var $el = $('tr[data-url="' + data.url + '"]');
+					if (data.type == 'done') {
+						$el.find('span[state]').attr('class', 'label label-success')
+						$el.find('span[state]').text('已完成')
+						$el.find('span[latest-update]').text(data.time)
+					} else if (data.type == 'doing') {
+						$el.find('span[state]').attr('class', 'label label-info')
+						$el.find('span[state]').text('正在爬取...')
+					}
+				})
+
+				ipcRenderer.on('error', (e, data) => {
+					$('p.text-danger').text(data)
+					console.log(data)
 				})
 			}
 

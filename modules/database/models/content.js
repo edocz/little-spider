@@ -11,7 +11,8 @@ module.exports = function(sequelize, DataTypes) {
     content: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      defaultValue: ''
+      defaultValue: '',
+			unique: true
     }
   }, {
     tableName: 'content'

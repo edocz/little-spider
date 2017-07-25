@@ -15,10 +15,20 @@ module.exports = function(sequelize, DataTypes) {
       unique: true
     },
     content: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: false,
       defaultValue: ''
-    }
+    },
+		link: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+			defaultValue: '',
+			unique: true
+		},
+		pubDate: {
+			type: DataTypes.DATE,
+			allowNull: false
+		}
   }, {
     tableName: 'article'
   });
