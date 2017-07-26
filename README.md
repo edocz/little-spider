@@ -1,7 +1,5 @@
-# little-spider
-
+little-spider
 ======
-
 An rss news spider build with electron
 
 ## Features
