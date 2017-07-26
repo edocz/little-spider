@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "main": "main.js",
   "dependencies": {
-    "async": "^2.5.0",
     "bluebird": "^3.5.0",
     "cheerio": "^1.0.0-rc.1",
     "cron": "^1.2.1",
