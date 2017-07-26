@@ -9,7 +9,7 @@ const util   = require('./modules/util')
 const worker = require('./modules/worker')
 const osType = require('os').type()
 
-const DEBUG  = true;
+const DEBUG  = false;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
