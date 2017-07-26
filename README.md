@@ -5,6 +5,7 @@ An rss news spider build with electron
 ## Features
 - Filter and replace keywords
 - Automatically store data to mysql
+- Sysb
 
 ## Installation
 ```bash
