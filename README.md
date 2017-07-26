@@ -1,5 +1,7 @@
 # little-spider
+
 ======
+
 An rss news spider build with electron
 
 ## Features
@@ -8,7 +10,7 @@ An rss news spider build with electron
 
 ## Installation
 ```bash
-git clone
+git clone https://github.com/edocz/little-spider.git
 ```
 ## Build
 ```bash
