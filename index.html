@@ -26,20 +26,32 @@
 					  </div>
 					  <div class="panel-body">
 					    <div class="form-group">
-					      <label for="">标题最小长度</label>
-					      <input type="number" class="form-control" id="title-min" placeholder="请输入最小长度">
+								<div class="row">
+									<div class="col-xs-6">
+										<label for="">标题最小长度</label>
+							      <input type="number" class="form-control" id="title-min" placeholder="最小长度">
+									</div>
+						      <div class="col-xs-6">
+										<label for="">标题最大长度</label>
+									  <input type="number" class="form-control" id="title-max" placeholder="最大长度">
+									</div>
+								</div>
 					    </div>
 							<div class="form-group">
-							  <label for="">标题最大长度</label>
-							  <input type="number" class="form-control" id="title-max" placeholder="请输入最大长度">
-							</div>
-							<div class="form-group">
-					      <label for="">段落最小长度</label>
-					      <input type="number" class="form-control" id="content-min" placeholder="请输入最小长度">
+								<div class="row">
+									<div class="col-xs-6">
+										<label for="">段落最小长度</label>
+							      <input type="number" class="form-control" id="content-min" placeholder="最小长度">
+									</div>
+									<div class="col-xs-6">
+										<label for="">段落最大长度</label>
+									  <input type="number" class="form-control" id="content-max" placeholder="最大长度">
+									</div>
+								</div>
 					    </div>
 							<div class="form-group">
-							  <label for="">段落最大长度</label>
-							  <input type="number" class="form-control" id="content-max" placeholder="请输入最大长度">
+							  <label for="app-sleep">任务完成等待时间(秒)</label>
+							  <input type="number" class="form-control" id="app-sleep" placeholder="请输入任务完成后等待时间，0为不等待">
 							</div>
 							<div class="form-group">
 							  <label for="">关键词处理</label>
@@ -61,12 +73,16 @@
 					  </div>
 					  <div class="panel-body">
 							<div class="form-group">
-							  <label for="">服务器IP</label>
-							  <input type="text" class="form-control" id="host" placeholder="请输入数据库服务器IP地址">
-							</div>
-							<div class="form-group">
-							  <label for="">端口</label>
-							  <input type="number" class="form-control" id="port" placeholder="" value="3306">
+								<div class="row">
+									<div class="col-xs-6">
+										<label for="">服务器IP</label>
+									  <input type="text" class="form-control" id="host" placeholder="请输入数据库服务器IP地址">
+									</div>
+									<div class="col-xs-6">
+										<label for="">端口</label>
+									  <input type="number" class="form-control" id="port" placeholder="" value="3306">
+									</div>
+								</div>
 							</div>
 							<div class="form-group">
 							  <label for="">数据库名</label>
@@ -105,16 +121,18 @@
 							</div>
 				    </div>
 				    <div class="panel-body">
-				      <table class="table" id="site-config">
-								<thead>
-									<th><input type="checkbox" id="selectAll"></th>
-									<th>链接</th>
-									<th>运行状态</th>
-									<th>最近爬取</th>
-								</thead>
-								<tbody>
-								</tbody>
-				      </table>
+							<div class="row pre-scrollable">
+								<table class="table" id="site-config">
+									<thead>
+										<th><input type="checkbox" id="selectAll"></th>
+										<th>链接</th>
+										<th>运行状态</th>
+										<th>最近爬取</th>
+									</thead>
+									<tbody>
+									</tbody>
+					      </table>
+							</div>
 				    </div>
 						<div class="panel-footer">
 							<div class="">
@@ -178,7 +196,7 @@
 		</div>
 		<!-- 模版配置 -->
 		<script id="tpl-item" type="text/html">
-			<tr data-type="{{type}}" data-url="{{url}}"  data-cycle="{{cycle}}">
+			<tr data-url="{{url}}">
 				<td><input type="checkbox" name="select"></td>
 				<td><a href="#" onclick="edit(this)">{{url}}</a></td>
 				<!-- <td><span class="label label-danger">已停止</span></td> -->
@@ -231,7 +249,7 @@
 			function edit(el) {
 				var data = $(el).closest('tr').data()
 				$('#site-modal').find('input[name="url"]:first').val(data.url)
-				$('#site-modal').find('input[name="cycle"]:first').val(data.cycle)
+				// $('#site-modal').find('input[name="cycle"]:first').val(data.cycle)
 				$('#site-modal').modal('show');
 			}
 
@@ -244,12 +262,24 @@
 				});
 
 				$('#add-site').on('click', (e) => {
+					$('#site-modal').find('input[name="url"]:first').val('')
 					$('#site-modal').modal('show');
 				});
 
 				$('#import-site').on('click', (e) => {
 					ipcRenderer.send('import-site', {});
 				});
+
+				$('#delete-site').on('click', (e) => {
+					var urls = [];
+					$('input[name="select"]').each((i, el) => {
+						if ($(el).is(':checked')) {
+							$(el).closest('tr').remove()
+							urls.push({url: $(el).closest('tr').data('url').toString()})
+						}
+					});
+					ipcRenderer.send('delete-site', {urls: urls})
+				})
 
 				$('#site-modal-save').on('click', (e) => {
 					var site = {};
@@ -259,10 +289,12 @@
 			        site[n['name']] = n['value'];
 			    });
 
-					$('tr[data-url="' + site.url + '"]').remove()
-
-					var html = template('tpl-item', site);
-					$('#site-config>tbody').append(html);
+					var $item = $('tr[data-url="' + site.url + '"]');
+					if ($item.length == 0) {
+						var html = template('tpl-item', site);
+						$('#site-config>tbody').prepend(html);
+						ipcRenderer.send('add-site', site.url);
+					}
 					$('#site-modal').modal('hide');
 				});
 
@@ -271,8 +303,16 @@
 					ipcRenderer.send('word-config', {type: type});
 				})
 
-				$('input').on('change', (e) => {
+				$('input').not('[type="checkbox"],[name="url"]').on('change', (e) => {
 					$('#app-save').show();
+				})
+
+				$('#selectAll').on('change', (e) => {
+					if ($(e.target).is(':checked')) {
+						$('input[name="select"]').prop('checked', true);
+					} else {
+						$('input[name="select"]').prop('checked', false);
+					}
 				})
 
 				$('#app-save').on('click', (e) => {
@@ -332,7 +372,7 @@
 
 			function buildConfig() {
 				var config = {}
-				$('input[type!="checkbox"]').map((i, el) => {
+				$('.container>.row:first').find('input').not('[type="checkbox"],[name="url"]').each((i, el) => {
 					var key = $(el).attr('id')
 					var val = $(el).val()
 					config[key] = val

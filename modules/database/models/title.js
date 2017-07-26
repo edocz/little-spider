@@ -11,8 +11,7 @@ module.exports = function(sequelize, DataTypes) {
     title: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      defaultValue: '',
-      unique: true
+      defaultValue: ''
     }
   }, {
     tableName: 'title'

@@ -13,7 +13,8 @@ var getData = function(item){
 			encoding: null,
 			transform: (body, response) => {
 				if (!(/^2/.test('' + response.statusCode))) {
-					return resolve(true)
+					item['content'] = [];
+					return resolve(item)
 				}
 				var charset = 'utf-8';
 				if (response.headers['content-type'].indexOf('charset=') !== -1) {
@@ -52,7 +53,10 @@ var getData = function(item){
 				}
 			});
 			$ = null;
-			if (content.length == 0) resolve(true);
+			if (content.length == 0) {
+				item['content'] = [];
+				resolve(item)
+			}
 			var last = content[content.length-1];
 			if(last && last.indexOf('：')>-1){
 				content.pop();
@@ -60,7 +64,8 @@ var getData = function(item){
 			item['content'] = content;
 			resolve(item);
 		}).catch(function (error) {
-			resolve(true)
+			item['content'] = [];
+			resolve(item)
 		});
 	});
 };

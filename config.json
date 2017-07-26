@@ -1,13 +1,13 @@
 {
+  "app-sleep": "5",
   "content-max": "1000",
   "content-min": "50",
   "database": "news",
   "host": "192.168.199.238",
   "password": "root",
   "port": "3306",
-  "site-debug-url": "",
   "title-max": "50",
   "title-min": "5",
-  "undefined": "",
-  "username": "root"
+  "username": "root",
+  "current": "http://news.baidu.com/n?cmd=4&class=civilnews&tn=rss"
 }

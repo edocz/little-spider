@@ -2,15 +2,12 @@ const fs   = require('fs');
 const util = require('../util');
 const _    = require('lodash');
 
-const CONFIG_PATH  = __dirname + '/../../config.json';
 const EXCLUDE_PATH = __dirname + '/../../word-exclude.txt';
 const REPLACE_PATH = __dirname + '/../../word-replace.txt';
 const INCLUDE_PATH = __dirname + '/../../word-include.txt';
 
-let content = fs.readFileSync(CONFIG_PATH);
-let config = {}
-
-if (util.isValidJson(content)) config = JSON.parse(content)
+let content = ''
+let config = util.loadConfig();
 
 content = fs.readFileSync(INCLUDE_PATH).toString();
 config['include'] = content.split('\n').filter((line) => { if (line) return line });
@@ -31,7 +28,7 @@ module.exports = function (records) {
 	return new Promise(function(resolve, reject) {
 		if (!records || records.length == 0) resolve([])
 		_.each(records, (news) => {
-			if (!news.content) return null;
+			if (!news.content || !news.title) return null;
 			var str = news.content.join('-_-!');
 			for(var i in config['exclude']) {
 				var exclude = config['exclude'][i];
@@ -60,11 +57,11 @@ module.exports = function (records) {
 					return par
 				}
 			})
-
-			results.push(Object.assign({}, news, {
+			var result = Object.assign({}, news, {
 				titles: titles,
 				paragraphs: pars
-			}));
+			});
+			results.push(result);
 		})
 		resolve(results);
 	});
