@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "url": "http://news.baidu.com/n?cmd=4&class=civilnews&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=4&class=civilnews&tn=rss"
+  },
+  {
+    "url": "http://news.baidu.com/n?cmd=4&class=internews&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=4&class=internews&tn=rss"
+  },
+  {
+    "url": "http://news.baidu.com/n?cmd=1&class=mil&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=1&class=mil&tn=rss"
+  },
+  {
+    "url": "http://news.baidu.com/n?cmd=1&class=finannews&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=1&class=finannews&tn=rss"
+  },
+  {
+    "url": "http://news.baidu.com/n?cmd=1&class=internet&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=1&class=internet&tn=rss"
+  },
+  {
+    "url": "http://news.baidu.com/n?cmd=1&class=technnews&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=1&class=technnews&tn=rss"
+  },
+  {
+    "url": "http://news.baidu.com/n?cmd=1&class=sportnews&tn=rss",
+    "title": "http://news.baidu.com/n?cmd=1&class=sportnews&tn=rss"
+  }
+]
