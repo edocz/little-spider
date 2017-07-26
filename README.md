@@ -22,7 +22,7 @@ electron .
 - Electron > 1.6.11
 ## Package
 ```bash
-electron-packager . little-spider --platform=win32 --arch=ia32 --version=1.6.11
+electron-packager . little-spider --platform=win32 --arch=ia32 --version=1.6.11 --out=release-builds  --version-string.CompanyName=SYSB --version-string.FileDescription=SYSB --version-string.ProductName=\"Little Spider\"
 ```
 ## Screenshot
 ![Sysb](https://raw.githubusercontent.com/edocz/little-spider/master/screenshot.png)
